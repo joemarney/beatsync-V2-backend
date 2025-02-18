@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EventsModule } from './events/events.module';
-import { Event } from './entities/event.entity';
 import { AuthModule } from './auth/auth.module';
+import { UserModule } from './users/user.module';
+import { EventsModule } from './events/events.module';
+import { User } from './users/user.entity';
+import { Event } from './events/event.entity';
 
 @Module({
   imports: [
@@ -10,11 +12,12 @@ import { AuthModule } from './auth/auth.module';
       type: 'postgres',
       url: process.env.DATABASE_URL,
       synchronize: true,
-      entities: [Event],
+      entities: [User, Event],
       logging: true,
     }),
-    EventsModule,
     AuthModule,
+    UserModule,
+    EventsModule,
   ],
 })
 export class AppModule {}

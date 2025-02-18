@@ -1,26 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Strategy, VerifyCallback, Profile } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private authService: AuthService) {
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientID:
+        process.env.GOOGLE_CLIENT_ID ??
+        (() => {
+          throw new Error('client id missing');
+        })(),
+      clientSecret:
+        process.env.GOOGLE_CLIENT_SECRET ??
+        (() => {
+          throw new Error('client secret missing');
+        })(),
       callbackURL: 'http://localhost:3000/auth/google/callback',
       scope: ['email', 'profile'],
+      passReqToCallback: true,
     });
   }
 
   async validate(
     accessToken: string,
     refreshToken: string,
-    profile: any,
+    profile: Profile,
     done: VerifyCallback,
-  ): Promise<any> {
-    const user = await this.authService.validateOAuthUser('google', profile);
+  ) {
+    console.log('Google Profile:', profile);
+
+    const user = await this.authService.validateOAuthUser(profile);
     return done(null, user);
   }
 }
